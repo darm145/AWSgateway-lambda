@@ -2,6 +2,11 @@ package edu.escuelaing.arep;
 
 import static spark.Spark.*;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import javax.print.attribute.standard.Media;
 
 import spark.Request;
@@ -11,63 +16,30 @@ public class SparkWebApp {
 
     public static void main(String[] args) {
         port(getPort());
-        get("/hello", (req, res) -> "Hello Heroku"); 
-        post("/asd", (req,res) ->{
-            return ("Request body"+req.body()+"\n Response Body"+res.body());
-        });
-        post("/media",(req,res)-> {
-
-            String[] values=req.body().split(" ");
-            LinkedList list=new LinkedList();
-            for(String i: values){
-                
-                list.insertar(Double.parseDouble(i));
-                
-            }
-            
-            return MedianStandard.media(list);
-        });
-        post("/desviacion",(req,res)-> {
-
-            String[] values=req.body().split(" ");
-            LinkedList list=new LinkedList();
-            for(String i: values){
-                
-                list.insertar(Double.parseDouble(i));
-                
-            }
-            
-            return MedianStandard.desviacion(list);
-        });
         get("/inputdata", (req, res) -> inputDataPage(req, res));
         get("/results", (req, res) -> resultsPage(req, res));
     }
+
     private static String inputDataPage(Request req, Response res) {
-        String pageContent
-                = "<!DOCTYPE html>"
-                + "<html>"
-                + "<body>"
-                + "<h2>Median an Standard deviation Calculator</h2>"
-                + "<form action=\"/results\">"
-                + "  please insert the data separated by a blank space :<br>"
-                + "  <input type=\"text\" name=\"Numeros\" value=\"\">"
-                + "  <br>"
-                + "  <input type=\"submit\" value=\"Calculate\">"
-                + "</form>"
-                + "<p>Al select the  \"Calculate\" button to display the results in the page  \"/results\".</p>"
-                + "</body>"
-                + "</html>";
+        String pageContent = "<!DOCTYPE html>" + "<html>" + "<body>" + "<h2>AWS SQUARE NUMBER</h2>"
+                + "<form action=\"/results\">" + "  please insert the Number: :<br>"
+                + "  <input type=\"text\" name=\"Numero\" value=\"\">" + "  <br>"
+                + "  <input type=\"submit\" value=\"Calculate\">" + "</form>"
+                + "<p> select the  \"Calculate\" button to display the results in the page  \"/results\".</p>"
+                + "</body>" + "</html>";
         return pageContent;
     }
 
-    private static String resultsPage(Request req, Response res) {
-        String[] values=req.queryParams("Numeros").split(" ");
-            LinkedList list=new LinkedList();
-            for(String i: values){
-                list.insertar(Double.parseDouble(i));
-            }
-        
-        return "The median of the inserted data is:"+ MedianStandard.media(list) +" and standard deviation is:"+MedianStandard.desviacion(list) ;
+    private static String resultsPage(Request req, Response res) throws Exception {
+        String value = req.queryParams("Numero");
+        URL url = new URL("https://vwz0ynhjcj.execute-api.us-east-1.amazonaws.com/beta?value=" + value);
+        String inputline = null;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+        String result=reader.readLine();
+        String pageContent = "<!DOCTYPE html>" + "<html>" + "<body >" + "<h2>"+result+"</h2>" + "<script>" + "</script>"
+                + "</body>" + "</html>";
+        return pageContent;
+
     }
 
     static int getPort() {
